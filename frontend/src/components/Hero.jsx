@@ -1,9 +1,14 @@
 import React from 'react';
 import { ArrowDown, Github, Linkedin, Mail, MapPin } from 'lucide-react';
 import { Button } from './ui/button';
-import { personalInfo } from '../data/mock';
+import { personalInfoApi } from '../services/api';
+import { useApi } from '../hooks/useApi';
+import { LoadingSection } from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
 
 const Hero = () => {
+  const { data: personalInfo, loading, error, refetch } = useApi(() => personalInfoApi.get());
+
   const scrollToAbout = () => {
     const aboutSection = document.querySelector('#about');
     if (aboutSection) {
@@ -11,11 +16,29 @@ const Hero = () => {
     }
   };
 
-  const socialIcons = {
-    github: Github,
-    linkedin: Linkedin,
-    mail: Mail
-  };
+  if (loading) {
+    return (
+      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
+        <LoadingSection message="Loading portfolio information..." />
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
+        <ErrorMessage message={error} onRetry={refetch} />
+      </section>
+    );
+  }
+
+  if (!personalInfo) {
+    return (
+      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
+        <ErrorMessage message="Personal information not found" onRetry={refetch} />
+      </section>
+    );
+  }
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
@@ -38,7 +61,7 @@ const Hero = () => {
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
               Hi, I'm{' '}
               <span className="bg-gradient-to-r from-blue-600 to-gray-800 bg-clip-text text-transparent">
-                Shreya
+                {personalInfo.name?.split(' ')[0]}
               </span>
             </h1>
             
