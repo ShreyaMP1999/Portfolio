@@ -119,15 +119,18 @@ backend:
   
   - task: "Personal Information API"
     implemented: true
-    working: "NA"
+    working: true
     file: "routes/personal.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented GET/POST/PUT endpoints for personal information management"
+      - working: true
+        agent: "testing"
+        comment: "✅ All endpoints working correctly. GET retrieves personal info with all required fields (name: Shreya Padaganur). PUT successfully updates data (tested tagline update). API returns proper JSON responses with correct data structure."
   
   - task: "Experience API Endpoints"
     implemented: true
