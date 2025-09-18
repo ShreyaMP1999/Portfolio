@@ -1,6 +1,6 @@
 import React from 'react';
 import { experience } from '../data/mock';
-import { Building2, Calendar, MapPin, Briefcase } from 'lucide-react';
+import { Building2, Calendar, MapPin, Briefcase, GraduationCap } from 'lucide-react';
 
 const Experience = () => {
   return (
