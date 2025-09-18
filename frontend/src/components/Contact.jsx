@@ -1,21 +1,26 @@
 import React, { useState } from 'react';
-import { personalInfo } from '../data/mock';
+import { personalInfoApi, contactApi } from '../services/api';
+import { useApi, useApiMutation } from '../hooks/useApi';
 import { Mail, Phone, MapPin, Github, Linkedin, Send, MessageCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { useToast } from '../hooks/use-toast';
+import { LoadingSection, LoadingCard } from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
 
 const Contact = () => {
   const { toast } = useToast();
+  const { data: personalInfo, loading, error, refetch } = useApi(() => personalInfoApi.get());
+  const { mutate: submitContact, loading: isSubmitting } = useApiMutation();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
     message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -27,23 +32,37 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    // Mock form submission
-    setTimeout(() => {
-      toast({
-        title: "Message Sent Successfully!",
-        description: "Thank you for reaching out. I'll get back to you soon.",
-      });
-      
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-      });
-      setIsSubmitting(false);
-    }, 1000);
+    
+    try {
+      await submitContact(
+        () => contactApi.submit(formData),
+        {
+          onSuccess: () => {
+            toast({
+              title: "Message Sent Successfully!",
+              description: "Thank you for reaching out. I'll get back to you soon.",
+            });
+            
+            setFormData({
+              name: '',
+              email: '',
+              subject: '',
+              message: ''
+            });
+          },
+          onError: (error) => {
+            toast({
+              title: "Failed to Send Message",
+              description: error || "Something went wrong. Please try again.",
+              variant: "destructive",
+            });
+          }
+        }
+      );
+    } catch (error) {
+      // Error is already handled by the mutation hook
+      console.error('Contact form submission failed:', error);
+    }
   };
 
   const contactMethods = [
