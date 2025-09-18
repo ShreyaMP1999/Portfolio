@@ -65,6 +65,53 @@ const Contact = () => {
     }
   };
 
+  // Handle loading state
+  if (loading) {
+    return (
+      <section id="contact" className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Let's Connect
+            </h2>
+            <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
+          </div>
+          <div className="grid lg:grid-cols-2 gap-12">
+            <LoadingCard />
+            <LoadingCard />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <section id="contact" className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Let's Connect
+            </h2>
+            <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
+          </div>
+          <ErrorMessage message={error} onRetry={refetch} />
+        </div>
+      </section>
+    );
+  }
+
+  if (!personalInfo) {
+    return (
+      <section id="contact" className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <ErrorMessage message="Personal information not found" onRetry={refetch} />
+        </div>
+      </section>
+    );
+  }
+
   const contactMethods = [
     {
       icon: Mail,
