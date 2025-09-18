@@ -1,13 +1,72 @@
 import React from 'react';
-import { personalInfo, achievements } from '../data/mock';
+import { personalInfoApi, achievementsApi } from '../services/api';
+import { useApi } from '../hooks/useApi';
 import { Award, Users, GraduationCap } from 'lucide-react';
+import { LoadingSection, LoadingCard } from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
 
 const About = () => {
+  const { data: personalInfo, loading: personalLoading, error: personalError, refetch: refetchPersonal } = useApi(() => personalInfoApi.get());
+  const { data: achievements, loading: achievementsLoading, error: achievementsError, refetch: refetchAchievements } = useApi(() => achievementsApi.getAll());
+
   const stats = [
     { number: '4+', label: 'Years Experience', icon: GraduationCap },
     { number: '3', label: 'Key Projects', icon: Award },
     { number: '50+', label: 'Bugs Resolved', icon: Users },
   ];
+
+  // Handle loading state
+  if (personalLoading || achievementsLoading) {
+    return (
+      <section id="about" className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              About Me
+            </h2>
+            <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
+          </div>
+          <div className="grid lg:grid-cols-2 gap-12">
+            <LoadingCard />
+            <LoadingCard />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Handle error state
+  if (personalError || achievementsError) {
+    return (
+      <section id="about" className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              About Me
+            </h2>
+            <div className="w-24 h-1 bg-blue-600 mx-auto mb-8"></div>
+          </div>
+          <ErrorMessage 
+            message={personalError || achievementsError} 
+            onRetry={() => {
+              if (personalError) refetchPersonal();
+              if (achievementsError) refetchAchievements();
+            }} 
+          />
+        </div>
+      </section>
+    );
+  }
+
+  if (!personalInfo) {
+    return (
+      <section id="about" className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <ErrorMessage message="Personal information not found" onRetry={refetchPersonal} />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="about" className="py-20 bg-white">
@@ -62,29 +121,35 @@ const About = () => {
             </h3>
             
             <div className="space-y-4">
-              {achievements.map((achievement) => (
-                <div 
-                  key={achievement.id}
-                  className="bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow duration-200"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                      <Award className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 mb-1">
-                        {achievement.title}
-                      </h4>
-                      <p className="text-sm text-blue-600 mb-2">
-                        {achievement.organization} • {achievement.year}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {achievement.description}
-                      </p>
+              {achievements && achievements.length > 0 ? (
+                achievements.map((achievement) => (
+                  <div 
+                    key={achievement.id}
+                    className="bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow duration-200"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                        <Award className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 mb-1">
+                          {achievement.title}
+                        </h4>
+                        <p className="text-sm text-blue-600 mb-2">
+                          {achievement.organization} • {achievement.year}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {achievement.description}
+                        </p>
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <p className="text-gray-600 text-center">No achievements data available</p>
                 </div>
-              ))}
+              )}
             </div>
 
             {/* Quick Contact */}
